@@ -1,0 +1,8 @@
+<launch>
+    <include file="$(find-pkg-share twil_bringup)/launch/gazebo.launch.xml">
+        <arg name="controller" value="joint_velocity_controller"/>
+        <arg name="pause" value="false"/>
+    </include>
+</launch>
+
+

@@ -1,0 +1,4 @@
+odometry_publisher:
+  ros__parameters:
+    wheel_separation: 0.322
+    wheel_radius: [0.075, 0.075]
