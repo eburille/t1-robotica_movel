@@ -3,6 +3,8 @@
         <arg name="controller" value="joint_velocity_controller"/>
         <arg name="pause" value="false"/>
     </include>
+
+    <node name="odometry_publisher" pkg="arc_odometry" exec="odometry_publisher" args="--ros-args --params-file $(find-pkg-share t1)/config/config.yaml" />
 </launch>
 
 
