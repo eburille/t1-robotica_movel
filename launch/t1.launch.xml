@@ -1,10 +1,15 @@
 <launch>
+    <arg name="config" default="$(find-pkg-share twil_bringup)/config/joint_velocity_controller.yaml"/>
+
     <include file="$(find-pkg-share twil_bringup)/launch/gazebo.launch.xml">
         <arg name="controller" value="joint_velocity_controller"/>
         <arg name="pause" value="false"/>
+        <arg name="config" value="$(find-pkg-share t1)/config/joint_velocity_controller.yaml"/>
     </include>
 
-    <node name="odometry_publisher" pkg="arc_odometry" exec="odometry_publisher" args="--ros-args --params-file $(find-pkg-share t1)/config/config.yaml" />
+    <include file="$(find-pkg-share t1)/launch/controlador.launch.xml" />
+
+    <node name="rviz" pkg="rviz2" exec="rviz2" />
+
+    <node name="odometry_publisher" pkg="arc_odometry" exec="odometry_publisher" args="--ros-args --params-file $(find-pkg-share t1)/config/odometry_config.yaml" />
 </launch>
-
-

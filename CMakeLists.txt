@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(control_msgs REQUIRED)
 
 add_executable(controlador src/controlador.cpp)
 target_include_directories(controlador PUBLIC
@@ -21,6 +22,7 @@ ament_target_dependencies(
   "rclcpp"
   "nav_msgs"
   "geometry_msgs"
+  "control_msgs"
 )
 
 install(TARGETS controlador
