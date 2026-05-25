@@ -19,7 +19,10 @@ class Controlador: public rclcpp::Node
         double xRef = 0.0;
         double yRef = 0.0;
         double thetaRef = 0.0;
-
+        double vel_x = 0.0;
+        double vel_y = 0.0;
+        double vel_lin = 0.0;
+        double alpha = 0.0;
         rclcpp::Publisher<control_msgs::msg::MultiDOFCommand>::SharedPtr angVelPub_;
 
         rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odomSub_;
@@ -31,6 +34,8 @@ class Controlador: public rclcpp::Node
         void odomSubCB(const nav_msgs::msg::Odometry::SharedPtr odomSub);
 
         void goalPoseCB(const geometry_msgs::msg::PoseStamped::SharedPtr goalPose);
+
+        void torqueCTRL();
       
 };
 
@@ -70,9 +75,9 @@ void Controlador::angVelPublisher(void)
     static double yAntigo = 0.0;
     static double thetaAntigo = 0.0;    
 
-    xAlvo = xAntigo * 0.998 + xRef * 0.001998;    
-    yAlvo = yAntigo * 0.998 + yRef * 0.001998;
-    thetaAlvo = thetaAntigo * 0.998 + thetaRef * 0.001998;    
+    xAlvo = xAntigo * alpha + xRef * (1-alpha);    
+    yAlvo = yAntigo * alpha + yRef * (1-alpha);
+    thetaAlvo = thetaAntigo * alpha + thetaRef * (1-alpha);    
 
     double y_dot[2] = {xAlvo - x, yAlvo - y};
 
@@ -119,6 +124,11 @@ void Controlador::odomSubCB(const nav_msgs::msg::Odometry::SharedPtr odomSub)
     double w_orientation = odomSub->pose.pose.orientation.w;
     theta = 2*atan2(z_orientation,w_orientation);
 
+    vel_x = odomSub->twist.twist.linear.x; 
+    vel_y = odomSub->twist.twist.linear.x; 
+
+    vel_lin = std::sqrt(vel_x*vel_x + vel_y*vel_y);
+
     RCLCPP_INFO(this->get_logger(), "\nOdometria recebida\n");
     RCLCPP_INFO(this->get_logger(), "--- Posição Atual do Robô (Odom) ---");
     RCLCPP_INFO(this->get_logger(), "X:     %.4f metros", x);
@@ -140,7 +150,18 @@ void Controlador::goalPoseCB(const geometry_msgs::msg::PoseStamped::SharedPtr go
     double z_orientation = goalPose->pose.orientation.z;
     double w_orientation = goalPose->pose.orientation.w;
     
+    double dRef = std::sqrt(xRef*xRef + yRef*yRef);
+    double d = std::sqrt(x*x + y*y);
+
     thetaRef = 2*atan2(z_orientation,w_orientation);
+
+    double ts = (0.1 + (dRef - d) * 17) / 4;
+    alpha = std::exp(-0.01 / ts);
+}
+
+void Controlador::torqueCTRL()
+{
+
 }
 
 int main(int argc, char ** argv)

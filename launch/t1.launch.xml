@@ -7,7 +7,7 @@
         <arg name="config" value="$(find-pkg-share t1)/config/joint_velocity_controller.yaml"/>
     </include>
 
-    <include file="$(find-pkg-share t1)/launch/controlador.launch.xml" />
+    <node name="controlador" pkg="t1" exec="controlador" />
 
     <node name="rviz" pkg="rviz2" exec="rviz2" />
 
