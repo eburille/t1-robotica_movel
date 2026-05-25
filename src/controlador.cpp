@@ -59,13 +59,7 @@ Controlador::Controlador(void): Node ("controlaor")
 
 void Controlador::angVelPublisher(void)
 {   
-    RCLCPP_INFO(this->get_logger(), "\n ang vel publicada\n");
-
-    // double dRef = std::sqrt(xRef*xRef + yRef*yRef);
-    // double d = std::sqrt(x*x + y*y);
-    // double v[2] = {dRef - d, thetaRef - theta};
-    
-    // double v_vet[2] = {xRef - x, yRef - y};
+    // RCLCPP_INFO(this->get_logger(), "\n ang vel publicada\n");
 
     static double xAlvo = 0.0;    
     static double yAlvo = 0.0;
@@ -107,9 +101,9 @@ void Controlador::angVelPublisher(void)
     msg.dof_names = {"right_wheel_joint", "left_wheel_joint"};
     msg.values = {w1, w2};
 
-    RCLCPP_INFO(this->get_logger(), "--- Vel Atual do Robô (Odom) ---");
-    RCLCPP_INFO(this->get_logger(), "V:     %.4f metros/s", w1);
-    RCLCPP_INFO(this->get_logger(), "W:     %.4f metros/s", w2);
+    // RCLCPP_INFO(this->get_logger(), "--- Vel Atual do Robô (Odom) ---");
+    // RCLCPP_INFO(this->get_logger(), "V:     %.4f metros/s", w1);
+    // RCLCPP_INFO(this->get_logger(), "W:     %.4f metros/s", w2);
 
     angVelPub_->publish(msg);
 }
@@ -129,16 +123,16 @@ void Controlador::odomSubCB(const nav_msgs::msg::Odometry::SharedPtr odomSub)
 
     vel_lin = std::sqrt(vel_x*vel_x + vel_y*vel_y);
 
-    RCLCPP_INFO(this->get_logger(), "\nOdometria recebida\n");
-    RCLCPP_INFO(this->get_logger(), "--- Posição Atual do Robô (Odom) ---");
-    RCLCPP_INFO(this->get_logger(), "X:     %.4f metros", x);
-    RCLCPP_INFO(this->get_logger(), "Y:     %.4f metros", y);
-    RCLCPP_INFO(this->get_logger(), "Theta: %.4f radianos (%.2f°)", theta, theta * (180.0 / M_PI));
+    // RCLCPP_INFO(this->get_logger(), "\nOdometria recebida\n");
+    // RCLCPP_INFO(this->get_logger(), "--- Posição Atual do Robô (Odom) ---");
+    // RCLCPP_INFO(this->get_logger(), "X:     %.4f metros", x);
+    // RCLCPP_INFO(this->get_logger(), "Y:     %.4f metros", y);
+    // RCLCPP_INFO(this->get_logger(), "Theta: %.4f radianos (%.2f°)", theta, theta * (180.0 / M_PI));
 
-    RCLCPP_INFO(this->get_logger(), "--- Posição Ref do Robô (Odom) ---");
-    RCLCPP_INFO(this->get_logger(), "X:     %.4f metros", xRef);
-    RCLCPP_INFO(this->get_logger(), "Y:     %.4f metros", yRef);
-    RCLCPP_INFO(this->get_logger(), "Theta: %.4f radianos (%.2f°)", thetaRef, thetaRef * (180.0 / M_PI));
+    // RCLCPP_INFO(this->get_logger(), "--- Posição Ref do Robô (Odom) ---");
+    // RCLCPP_INFO(this->get_logger(), "X:     %.4f metros", xRef);
+    // RCLCPP_INFO(this->get_logger(), "Y:     %.4f metros", yRef);
+    // RCLCPP_INFO(this->get_logger(), "Theta: %.4f radianos (%.2f°)", thetaRef, thetaRef * (180.0 / M_PI));
 
 }
 
