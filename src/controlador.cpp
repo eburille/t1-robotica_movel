@@ -67,39 +67,63 @@ void Controlador::angVelPublisher(void)
     
     static double xAntigo = 0.0;    
     static double yAntigo = 0.0;
-    static double thetaAntigo = 0.0;    
+    static double thetaAntigo = 0.0;  
+    
+    static double integralX = 0.0;
+    static double integralY = 0.0;
 
-    xAlvo = xAntigo * alpha + xRef * (1-alpha);    
-    yAlvo = yAntigo * alpha + yRef * (1-alpha);
-    thetaAlvo = thetaAntigo * alpha + thetaRef * (1-alpha);    
+    // 1. Calcula o erro atual (Ação Proporcional)
+    double erroX = xRef - x;
+    double erroY = yRef - y;
 
-    double y_dot[2] = {xAlvo - x, yAlvo - y};
+    // 2. Acumula o erro no tempo (Ação Integral Discreta a 100Hz -> Ts = 0.01)
+    // ATENÇÃO: 'integralX' e 'integralY' devem ser variáveis globais ou membros da classe!
+    integralX += erroX * 0.01;
+    integralY += erroY * 0.01;
 
+    // Antirewind / Anti-windup (Opcional, mas altamente recomendado):
+    // Impede que a integral cresça infinitamente se o robô colidir ou travar
+    integralX = std::max(std::min(integralX, 1.0), -1.0);
+    integralY = std::max(std::min(integralY, 1.0), -1.0);
+
+    // 3. Define os Ganhos do Controlador (Ajuste esses valores no seu teste!)
+    double Kp = 1.0; 
+    double Ki = 0.05;
+
+    // 4. Monta o novo vetor v (y_dot) com a estrutura PI
+    double y_dot[2] = {
+        Kp * erroX + Ki * integralX,
+        Kp * erroY + Ki * integralY
+    };
+
+    // Atualização de histórico (Seu código original)
     xAntigo = xAlvo;
     yAntigo = yAlvo;
     thetaAntigo = thetaAlvo;
 
-
+    // 5. Matriz E^-1(x) com ponto deslocado b = 0.1m
+    double b = 0.1; 
     double Einv[2][2] = {
-        {cos(theta) - sin(theta),   sin(theta) + cos(theta)},
-        {         -sin(theta)   ,         cos(theta)       }
+        { cos(theta),           sin(theta)          },
+        {-sin(theta) / b,       cos(theta) / b      }
     };
 
-    // v = posicao referencia - posicao real
-    // u = {v_lin, v_ang}
+    // 6. Multiplicação Matriz x Vetor PI
     double u[2] = {
-        y_dot[0]*Einv[0][0] + y_dot[1]*Einv[0][1],
-        y_dot[0]*Einv[1][0] + y_dot[1]*Einv[1][1] 
+        Einv[0][0] * y_dot[0] + Einv[0][1] * y_dot[1],
+        Einv[1][0] * y_dot[0] + Einv[1][1] * y_dot[1]
     };
 
-    // vel_ang_r
-    double w1 = (u[0] + u[1] * 0.322 / 2) / 0.075;
-    double w2 = (u[0] - u[1] * 0.322 / 2) / 0.075;
+    // 7. Cinemática Inversa das Rodas (L = 0.322, R = 0.075)
+    double w1 = (u[0] + (u[1] * 0.322 / 2.0)) / 0.075; // Roda Direita
+    double w2 = (u[0] - (u[1] * 0.322 / 2.0)) / 0.075; // Roda Esquerda
 
-
+    // 8. Publicação
     control_msgs::msg::MultiDOFCommand msg;
     msg.dof_names = {"right_wheel_joint", "left_wheel_joint"};
     msg.values = {w1, w2};
+
+    angVelPub_->publish(msg);
 
     // RCLCPP_INFO(this->get_logger(), "--- Vel Atual do Robô (Odom) ---");
     // RCLCPP_INFO(this->get_logger(), "V:     %.4f metros/s", w1);
